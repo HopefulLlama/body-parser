@@ -282,11 +282,22 @@ encoding of the request. The parsing can be aborted by throwing an error.
 ## Errors
 
 The middlewares provided by this module create errors depending on the error
-condition during parsing. The errors will typically have a `status`/`statusCode`
-property that contains the suggested HTTP response code, an `expose` property
-to determine if the `message` property should be displayed to the client, a
-`type` property to determine the type of error without matching against the
-`message`, and a `body` property containing the read body, if available.
+condition during parsing. 
+
+This is passed to an Express error handling middleware, if one is defined, 
+in the usual way. Therefore, further inspection and handling can be performed 
+in another error handling middleware.
+
+The error provided is the original error thrown, with additional properties to 
+aid in generating a response, although these do not have to be used.
+
+The error will typically have the following properties added:
+
+* `status`: A suggested HTTP response code
+* `statusCode`: Identical to status. Simply used as an alias.
+* `expose`: A boolean to determine if the original `message` property should be displayed
+* `type`: Aids in determining the type of error
+* `body`: Contains the original body from the request, if available
 
 The following are the common errors emitted, though any error can come through
 for various reasons.
@@ -298,6 +309,13 @@ contained an encoding but the "inflation" option was set to `false`. The
 `status` property is set to `415`, the `type` property is set to
 `'encoding.unsupported'`, and the `charset` property will be set to the
 encoding that is unsupported.
+
+### entity parse failed
+
+This error will occur when the request had a body that could not be parsed. 
+For example: Using `.json()` middleware to parse the body as JSON. The `status`
+property is set to `400` and the `type` property is set to 
+`'entity.parse.failed'`.
 
 ### request aborted
 
